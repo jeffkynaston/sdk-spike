@@ -1,0 +1,9 @@
+# PlastiqPublicApi.ErrorErrors
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**details** | **String** |  | [optional] 
+
+

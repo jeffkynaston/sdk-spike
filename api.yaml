@@ -1,0 +1,3273 @@
+openapi: "3.0.1"
+info:
+  title: Plastiq Public API
+  version: 1.0.0
+servers:
+  - url: https://connect.sandbox.plastiq.com/api
+    description: Sandbox server
+  - url: https://connect.plastiq.com/api
+    description: Production server
+security:
+  - BearerAuth: []
+paths:
+  /categories:
+    get:
+      summary: Retrieve a paginated list of Categories by query parameter(s)
+      tags:
+        - Categories
+      responses:
+        "200":
+          description: A list of Categories
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+                  pagination:
+                    type: object
+                    allOf:
+                      - $ref: "#/components/schemas/PaginationObject"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /client-secrets:
+    post:
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      summary: Create a single-use Client Secret
+      tags:
+        - ClientSecrets
+      requestBody:
+        description: Create a single-use Client Secret to be shared with browser for tokenization of sensitive data such as credit card numbers. The Client Secret expires after 60 seconds.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payerId
+              properties:
+                payer:
+                  $ref: "#/components/schemas/payerId"
+                type:
+                  type: string
+                  enum:
+                    - CARD
+                  description: The type of object to create the Client Secret for. Defaults to CARD.
+                  example: CARD
+      responses:
+        "200":
+          description: Client Secret created successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientSecret:
+                    $ref: "#/components/schemas/ClientSecret"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /documents:
+    post:
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      summary: Upload a document
+      tags:
+        - Documents
+      requestBody:
+        description: Document metadata
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDocumentUploadRequest"
+      responses:
+        "200":
+          description: Document upload URL generated successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentUpload"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payers:
+    post:
+      summary: Create a Payer
+      tags:
+        - Payers
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      requestBody:
+        description: Payer to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePayerRequest"
+      responses:
+        "200":
+          description: Payer created successfully.
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payer"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payers/{id}:
+    get:
+      summary: Retrieve a Payer
+      tags:
+        - Payers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payer
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Payer retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payer"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update a Payer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payer
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Payers
+      requestBody:
+        description: Payer to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePayerRequest"
+      responses:
+        "200":
+          description: Payer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payer"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payer
+          schema:
+            type: string
+            format: uuid
+      summary: Delete a Payer
+      tags:
+        - Payers
+      responses:
+        "204":
+          description: Payer deleted successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payments:
+    post:
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: Idempotency-Key
+          schema:
+            type: string
+          description: "A valid UUID (V4) for handling duplicate requests. Will return original status code, response body, and set a 'Idempotent-Replay' header on response for a given key if a match exists."
+      summary: Create a Payment from a Payment Intent
+      tags:
+        - Payments
+      requestBody:
+        description: Payment to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+      responses:
+        "200":
+          description: Payment created successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+            Idempotent-Replay:
+              schema:
+                type: boolean
+              description: Returned if an Idempotency-Key header was provided on the request and a match was found and returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Retrieve a paginated list of payments by query parameter(s)
+      tags:
+        - Payments
+      parameters:
+        - name: payerId
+          in: query
+          required: true
+          description: The associated Payer ID to list payments for
+          schema:
+            type: string
+            format: uuid
+        - name: offset
+          in: query
+          required: false
+          description: The number of records you wish to skip before selecting records
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          description: Number of items to return
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of Payments
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Payment"
+                  pagination:
+                    type: object
+                    allOf:
+                      - $ref: "#/components/schemas/PaginationObject"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payments/{id}:
+    get:
+      summary: Retrieve a single Payment
+      tags:
+        - Payments
+      parameters:
+        - name: payerId
+          in: query
+          required: true
+          description: The Payer ID associated with the Payment
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A Payment object
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payments/{id}/refunds:
+    post:
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment to refund
+          schema:
+            type: string
+            format: uuid
+      summary: Refund or cancel an existing Payment
+      tags:
+        - Payments
+      requestBody:
+        description: Payment Refund body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRefundRequest"
+      responses:
+        "200":
+          description: Payment refunded successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRefund"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payment-intents:
+    post:
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      summary: Create a Payment Intent
+      tags:
+        - Payments
+      requestBody:
+        description: Create a Payment Intent object staging it for execution
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentIntentRequestPayload"
+      responses:
+        "200":
+          description: Payment Intent created successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntent"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payment-intents/{id}:
+    get:
+      summary: Retrieve a single Payment Intent
+      tags:
+        - Payments
+      parameters:
+        - name: payerId
+          in: query
+          required: true
+          description: The Payer ID of the Payment Intent
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment Intent
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: A Payment Intent object
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntent"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment Intent
+          schema:
+            type: string
+            format: uuid
+      summary: Update a Payment Intent
+      tags:
+        - Payments
+      requestBody:
+        description: Payment Intent to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchPaymentIntentRequestPayload"
+      responses:
+        "200":
+          description: Payment Intent updated successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntent"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payment-methods:
+    post:
+      summary: Create a Payment Method
+      tags:
+        - Payment Methods
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      requestBody:
+        description: Payment Method to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentMethodRequest"
+      responses:
+        "200":
+          description: Payment Method created successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Retrieve a paginated list of Payment Methods by query parameter(s)
+      tags:
+        - Payment Methods
+      parameters:
+        - name: payerId
+          in: query
+          required: true
+          description: The associated Payer ID to list Payment Methods for
+          schema:
+            type: string
+            format: uuid
+        - name: offset
+          in: query
+          required: false
+          description: The number of records you wish to skip before selecting records
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          description: Number of items to return
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of Payment Methods
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentMethod"
+                  pagination:
+                    type: object
+                    allOf:
+                      - $ref: "#/components/schemas/PaginationObject"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payment-methods/{id}:
+    get:
+      parameters:
+        - name: payerId
+          in: query
+          required: true
+          description: The Payer ID associated to the Payment Method
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment Method
+          schema:
+            type: string
+            format: uuid
+      summary: Retrieve a Payment Method
+      tags:
+        - Payment Methods
+      responses:
+        "200":
+          description: A Payment Method object
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment Method
+          schema:
+            type: string
+            format: uuid
+      summary: Delete a Payment Method
+      tags:
+        - Payment Methods
+      responses:
+        "204":
+          description: Payment Method deleted successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update a Payment Method
+      tags:
+        - Payment Methods
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Payment Method
+          schema:
+            type: string
+            format: uuid
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      requestBody:
+        description: Payment Method to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchPaymentMethodRequest"
+      responses:
+        "200":
+          description: Payment Method updated successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /recipients:
+    post:
+      parameters:
+        - in: header
+          name: Trace-Id
+          schema:
+            type: string
+          description: "A valid UUID (V4) for tracing requests. Will be returned as a header. If not present or invalid, a generated UUID will be returned."
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          description: "A string representing the User Agent. Required only when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Device-Id
+          schema:
+            type: string
+          description: "A unique identifier for the end user's browser. Recommended for compliance when the request is not coming from the end user's browser."
+        - in: header
+          name: End-User-Ip
+          schema:
+            type: string
+          description: "The IP address of the end user. Recommended for compliance when the request is not coming from the end user's browser."
+      summary: Create a Recipient
+      tags:
+        - Recipients
+      requestBody:
+        description: Recipient to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecipientRequest"
+      responses:
+        "200":
+          description: Recipient created successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipient"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Retrieve a paginated list of Recipients by query parameter(s)
+      tags:
+        - Recipients
+      parameters:
+        - name: payerId
+          in: query
+          required: false
+          description: List only Recipients associated with this Payer ID
+          schema:
+            type: string
+            format: uuid
+        - name: offset
+          in: query
+          required: false
+          description: The number of records you wish to skip before selecting records
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          description: Number of items to return
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of Recipients
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Recipient"
+                  pagination:
+                    type: object
+                    allOf:
+                      - $ref: "#/components/schemas/PaginationObject"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /recipients/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Recipient
+          schema:
+            type: string
+            format: uuid
+        - name: payerId
+          in: query
+          required: false
+          description: The ID of the Payer the Recipient is scoped to
+          schema:
+            type: string
+            format: uuid
+      summary: Retrieve a Recipient
+      tags:
+        - Recipients
+      responses:
+        "200":
+          description: A Recipient object
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipient"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Recipient
+          schema:
+            type: string
+            format: uuid
+      summary: Update a Recipient
+      tags:
+        - Recipients
+      requestBody:
+        description: Recipient to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchRecipientRequest"
+      responses:
+        "200":
+          description: Recipient updated successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipient"
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Recipient
+          schema:
+            type: string
+            format: uuid
+        - name: payerId
+          in: query
+          required: false
+          description: The ID of the Payer the Recipient is scoped to
+          schema:
+            type: string
+            format: uuid
+      summary: Delete a Recipient
+      tags:
+        - Recipients
+      responses:
+        "204":
+          description: Recipient deleted successfully
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+        "400":
+          description: Bad Request
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          headers:
+            Trace-Id:
+              schema:
+                type: string
+                format: uuid
+              description: The trace ID for the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "GENERIC_ERROR"
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              details:
+                type: string
+        traceId:
+          type: string
+          format: uuid
+    PaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "9998b94e-9008-4f10-9263-1476d2f7bd40"
+        fees:
+          type: array
+          items:
+            type: object
+            properties:
+              amount:
+                allOf:
+                  - $ref: "#/components/schemas/amountDetails"
+                  - type: object
+                    properties:
+                      value:
+                        example: 2.85
+              type:
+                type: string
+                description: The type of fee applied to the payment
+                enum:
+                  - "PLASTIQ_SERVICE_FEE"
+                  - "PLASTIQ_CROSS_BORDER_FEE"
+              rate:
+                type: string
+                description:
+                  The rate of the fee assessed, presented in percentage.
+                example: "2.85%"
+        sourceAmount:
+          allOf:
+            - $ref: "#/components/schemas/amountDetails"
+            - type: object
+              properties:
+                value:
+                  example: 102.85
+        targetAmount:
+          allOf:
+            - $ref: "#/components/schemas/amountDetails"
+            - type: object
+              properties:
+                value:
+                  example: 100
+        paymentMethod:
+          $ref: "#/components/schemas/paymentMethodId"
+        # paymentMethodId:
+        #   type: string
+        #   format: uuid
+        #   example: "6f0eb884-3f41-4b57-b86a-80f62dca011e"
+        recipient:
+          $ref: "#/components/schemas/recipientId"
+        # recipientId:
+        #   type: string
+        #   format: uuid
+        #   example: "a8d4e641-e130-43d1-90a0-9717561539aa"
+        payer:
+          $ref: "#/components/schemas/payerId"
+        # payerId:
+        #   type: string
+        #   format: uuid
+        #   example: "8f51c396-6e29-49a6-ba5a-1a31d5420158"
+        details:
+          $ref: "#/components/schemas/PaymentDetails"
+        # sourceDescriptor:
+        #   type: string
+        #   example: "PQ Coffee Beans Supply Co #ARSSDF45"
+        # targetDescriptor:
+        #   type: string
+        #   example: "PQ Philz Coffee #ARSSDF45"
+        status:
+          type: string
+          enum:
+            - "CAPTURABLE"
+            - "CAPTURED"
+            - "EXPIRED"
+            - "UNCAPTURABLE"
+          example: "CAPTURABLE"
+        statusReasons:
+          type: array
+          items:
+            type: object
+          example: []
+        deliveryDate:
+          type: string
+          format: date
+          example: "2020-11-20"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2020-11-19T01:35:53.096Z"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2020-11-19T01:40:53.096Z"
+    Id:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "6f0eb884-3f41-4b57-b86a-80f62dca011e"
+    recipientId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a8d4e641-e130-43d1-90a0-9717561539aa"
+    payerId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "8f51c396-6e29-49a6-ba5a-1a31d5420158"
+    paymentMethodId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "6f0eb884-3f41-4b57-b86a-80f62dca011e"
+    paymentId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "cf795f3c-085d-43ef-b804-657a6f3ef821"
+    paymentIntentId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c46abad9-16a1-47da-8e48-3eafc24aad54"
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "bbe023aa-ccd6-4bfc-a209-c6bb5859a9a8"
+        fees:
+          type: array
+          items:
+            type: object
+            properties:
+              amount:
+                allOf:
+                  - $ref: "#/components/schemas/amountDetails"
+                  - type: object
+                    properties:
+                      value:
+                        example: 2.85
+              type:
+                type: string
+                description: The type of fee applied to the payment
+                enum:
+                  - "PLASTIQ_SERVICE_FEE"
+                  - "PLASTIQ_CROSS_BORDER_FEE"
+              rate:
+                type: string
+                description:
+                  The rate of the fee assessed, presented in percentage.
+                example: "2.85%"
+        sourceAmount:
+          allOf:
+            - $ref: "#/components/schemas/amountDetails"
+            - type: object
+              properties:
+                value:
+                  example: 102.85
+        targetAmount:
+          allOf:
+            - $ref: "#/components/schemas/amountDetails"
+            - type: object
+              properties:
+                value:
+                  example: 100
+        paymentMethod:
+          $ref: "#/components/schemas/paymentMethodId"
+        # paymentMethodId:
+        #   type: string
+        #   format: uuid
+        #   example: "6f0eb884-3f41-4b57-b86a-80f62dca011e"
+        recipient:
+          $ref: "#/components/schemas/recipientId"
+        # recipientId:
+        #   type: string
+        #   format: uuid
+        #   example: "a8d4e641-e130-43d1-90a0-9717561539aa"
+        payer:
+          $ref: "#/components/schemas/payerId"
+        # payerId:
+        #   type: string
+        #   format: uuid
+        #   example: "8f51c396-6e29-49a6-ba5a-1a31d5420158"
+        details:
+          $ref: "#/components/schemas/PaymentDetails"
+        # chargeDate:
+        # type: string
+        # format: date-time
+        deliveryDate:
+          type: string
+          format: date
+          example: "2020-11-20"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2020-11-19T01:35:55.096Z"
+        status:
+          type: string
+          allOf:
+            - $ref: "#/components/schemas/PaymentStatus"
+        sourceDescriptor:
+          type: string
+          example: "PQ Coffee Beans Supply Co #ARSSDF45"
+        targetDescriptor:
+          type: string
+          example: "PQ Philz Coffee #ARSSDF45"
+    CreatePaymentRequest:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/CreatePaymentRequestFromId"
+        - $ref: "#/components/schemas/CreatePaymentIntentRequestPayload"
+    CreatePaymentRequestFromId:
+      type: object
+      properties:
+        paymentIntent:
+          oneOf:
+            - $ref: "#/components/schemas/paymentIntentId"
+            - $ref: "#/components/schemas/CreatePaymentIntentRequestPayload"
+        payer:
+          $ref: "#/components/schemas/payerId"
+    PaymentRefund:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - REFUNDED
+            - REFUND_FAILED
+          description: "Representation of whether the Payment was successfully refunded or not"
+    PaymentRefundRequest:
+      type: object
+      properties:
+        payerId:
+          type: string
+          format: uuid
+          example: "2e571899-5ba6-4779-9267-899f0cb95c1f"
+          description: "The ID of the Payer the Payment to refund belongs to"
+    CreatePaymentIntentRequestPayload:
+      type: object
+      required:
+        - paymentMethod
+        - recipient
+        - payer
+      properties:
+        targetAmount:
+          oneOf:
+            - $ref: "#/components/schemas/amountDetails"
+        paymentMethod:
+          oneOf:
+            - $ref: "#/components/schemas/paymentMethodId"
+            # - $ref: "#/components/schemas/CreatePaymentMethodRequest"
+        recipient:
+          oneOf:
+            - $ref: "#/components/schemas/recipientId"
+            - $ref: "#/components/schemas/CreateRecipientRequest"
+        payer:
+          oneOf:
+            - $ref: "#/components/schemas/payerId"
+            # - $ref: "#/components/schemas/CreatePayerRequest"
+        details:
+          $ref: "#/components/schemas/PaymentDetails"
+        metadata:
+          $ref: "#/components/schemas/PaymentMetadata"
+    PatchPaymentIntentRequestPayload:
+      type: object
+      properties:
+        targetAmount:
+          oneOf:
+            - $ref: "#/components/schemas/amountDetails"
+        details:
+          $ref: "#/components/schemas/PaymentDetails"
+        metadata:
+          $ref: "#/components/schemas/PaymentMetadata"
+        # charge:
+        #   type: boolean
+        #   description: Whether to charge the Payment Intent or not. This will transition a Payment Intent into a Payment and begin the funding process.
+        #   default: false
+    # CreatePaymentRequestIds:
+    #   type: object
+    #   required:
+    #     - paymentIntentId
+    #   properties:
+    #     paymentIntentId:
+    #       type: string
+    #       format: uuid
+    #       example: "080c0272-0987-43dc-9974-1e5c59f747e0"
+    #     payerId:
+    #       type: string
+    #       format: uuid
+    #       example: "8f51c396-6e29-49a6-ba5a-1a31d5420158"
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "d7a2beba-0c2c-42de-9690-26f00ba08339"
+        displayName:
+          type: string
+          example: "General Inventory"
+    Recipient:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a8d4e641-e130-43d1-90a0-9717561539aa"
+        businessName:
+          type: string
+          example: "Coffee Beans Supply Co."
+        categoryId:
+          type: string
+          format: uuid
+          example: "d7a2beba-0c2c-42de-9690-26f00ba08339"
+        businessAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/RecipientAddress"
+        contact:
+          type: object
+          properties:
+            firstName:
+              type: string
+              example: "Bob"
+            lastName:
+              type: string
+              example: "Smith"
+            email:
+              type: string
+              example: "bobsmith@coffeebean.supply"
+            phone:
+              type: string
+              example: "4155550100"
+        receivingMethod:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/ACH"
+            - $ref: "#/components/schemas/Check"
+            - $ref: "#/components/schemas/EFT"
+          example:
+            type: "ACH"
+            accountLastFour: "4723"
+            routingNumber: "021000021"
+            beneficiaryName: "Coffee Beans Supply Co."
+        createdAt:
+          type: string
+          format: date-time
+          example: "2020-11-19T01:35:53.096Z"
+        status:
+          type: string
+          allOf:
+            - $ref: "#/components/schemas/Status"
+    CreateRecipientRequest:
+      type: object
+      required:
+        - businessName
+        - categoryId
+        - businessAddress
+        - contact
+        - receivingMethod
+      properties:
+        businessName:
+          type: string
+          example: "Coffee Beans Supply Co."
+        categoryId:
+          type: string
+          format: uuid
+          example: "d7a2beba-0c2c-42de-9690-26f00ba08339"
+        businessAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/RecipientAddress"
+        contact:
+          type: object
+          required:
+            - email
+          properties:
+            firstName:
+              type: string
+              example: "Bob"
+            lastName:
+              type: string
+              example: "Smith"
+            email:
+              type: string
+              example: "bobsmith@coffeebean.supply"
+            phone:
+              type: string
+              example: "4155550100"
+        receivingMethod:
+          oneOf:
+            - $ref: "#/components/schemas/ACH"
+            - $ref: "#/components/schemas/Check"
+            - $ref: "#/components/schemas/EFT"
+            - $ref: "#/components/schemas/Wire"
+          example:
+            type: "ACH"
+            accountNumber: "3829473294723"
+            routingNumber: "021000021"
+            beneficiaryName: "Coffee Beans Supply Co."
+        payer:
+          $ref: "#/components/schemas/payerId"
+    PatchRecipientRequest:
+      type: object
+      properties:
+        businessName:
+          type: string
+          example: "Coffee Beans Supply Co."
+        businessAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/RecipientAddress"
+        contact:
+          type: object
+          required:
+            - email
+          properties:
+            firstName:
+              type: string
+              example: "Bob"
+            lastName:
+              type: string
+              example: "Smith"
+            email:
+              type: string
+              example: "bobsmith@coffeebean.supply"
+            phone:
+              type: string
+              example: "4155550100"
+        payer:
+          $ref: "#/components/schemas/payerId"
+    ACH:
+      type: object
+      required:
+        - type
+        - accountNumber
+        - routingNumber
+        - beneficiaryName
+      properties:
+        type:
+          type: string
+          enum:
+            - ACH
+        accountNumber:
+          type: string
+          example: "3829473294723"
+          description: "Bank ACH account number"
+        routingNumber:
+          type: string
+          example: "021000021"
+          description: 9 digit bank routing number
+          minLength: 9
+          maxLength: 9
+        beneficiaryName:
+          type: string
+          example: "Coffee Beans Supply Co."
+          minLength: 1
+          maxLength: 35
+    Check:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - CHECK
+      allOf:
+        - $ref: "#/components/schemas/Address"
+    EFT:
+      type: object
+      required:
+        - type
+        - accountNumber
+        - routingNumber
+        - beneficiaryName
+      properties:
+        type:
+          type: string
+          enum:
+            - EFT
+        accountNumber:
+          type: string
+          example: "3864328462"
+          description: "Bank EFT account number"
+        routingNumber:
+          type: string
+          example: "00301094"
+          description: 8 digit routing number
+          minLength: 8
+          maxLength: 8
+        beneficiaryName:
+          type: string
+          example: "Coffee Beans Supply Co."
+          minLength: 1
+          maxLength: 35
+    Wire:
+      type: object
+      required:
+        - type
+        - accountNumber
+        - routingNumber
+        - beneficiaryName
+        - country
+      properties:
+        type:
+          type: string
+          enum:
+            - WIRE
+        accountNumber:
+          type: string
+          example: "3829473294723"
+          description: "Bank wire account number (alphanumeric)"
+          minLength: 1
+          maxLength: 35
+        routingNumber:
+          type: string
+          example: "021000021"
+          description: "Bank wire routing number"
+          minLength: 8
+          maxLength: 11
+        beneficiaryName:
+          type: string
+          example: "Coffee Beans Supply Co."
+          minLength: 1
+          maxLength: 35
+        country:
+          type: string
+          description: "Two-letter country code (ISO 3166-1 alpha-2)."
+          enum:
+            - US
+    CreatePaymentMethodRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - CARD
+            - BANK_ACCOUNT
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/Card"
+            - $ref: "#/components/schemas/BankAccount"
+        payer:
+          oneOf:
+            - $ref: "#/components/schemas/payerId"
+            # - $ref: "#/components/schemas/CreatePayerRequest"
+    PatchPaymentMethodRequest:
+      type: object
+      required:
+        - type
+        - data
+        - payer
+      properties:
+        type:
+          type: string
+          enum:
+            - CARD
+            - BANK_ACCOUNT
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/PatchCard"
+            - $ref: "#/components/schemas/PatchBankAccount"
+        payer:
+          $ref: "#/components/schemas/payerId"
+    BankAccount:
+      description: "Bank Account Funded"
+      type: object
+      required:
+        - accountHolderName
+        - accountNumber
+        - routingNumber
+        - billingAddress
+      properties:
+        accountHolderName:
+          type: string
+          description: "The legal name of the account holder"
+          example: "Jane Payer"
+        accountNumber:
+          type: string
+          description: "The account number of the bank account"
+          example: "41541433888"
+        accountType:
+          type: string
+          description: "The type of the bank account"
+          enum:
+            - CHECKING
+            - SAVINGS
+          example: "CHECKING"
+        routingNumber:
+          type: string
+          description: "The routing number of the bank account"
+          example: "211371120"
+        billingAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+    PatchBankAccount:
+      description: "Bank Account Funded"
+      type: object
+      properties:
+        accountHolderName:
+          type: string
+          description: "The legal name of the account holder"
+          example: "Jane Payer"
+        routingNumber:
+          type: string
+          description: "The routing number of the bank account"
+          example: "211371120"
+    BankAccountResponse:
+      type: object
+      properties:
+        accountType:
+          type: string
+          description: "The type of the bank account"
+          enum:
+            - CHECKING
+            - SAVINGS
+          example: "CHECKING"
+        accountHolderName:
+          type: string
+          description: "The legal name of the account holder"
+          example: "Jane Payer"
+        createdAt:
+          type: string
+          format: datetime
+          example: "2020-11-19T01:35:53.096Z"
+        accountLastFour:
+          type: string
+          description: "Last 4 digits of the account number"
+          example: "4242"
+        routingNumber:
+          type: string
+          description: "The routing number of the bank account"
+          example: "211371120"
+        billingAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+    PatchCard:
+      description: "Debit or Credit Card"
+      type: object
+      required:
+        - cvv
+      properties:
+        cardHolderName:
+          type: string
+          example: "Jen Doe"
+        cvv:
+          type: string
+          description: "3-4 digits"
+          example: "123"
+        expirationMonth:
+          type: string
+          example: "01"
+        expirationYear:
+          type: string
+          example: "2021"
+        billingAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+    Card:
+      description: "Debit or Credit Card"
+      type: object
+      required:
+        - accountNumber
+        - cvv
+        - expirationMonth
+        - expirationYear
+        - billingAddress
+        - cardHolderName
+      properties:
+        cardHolderName:
+          type: string
+          example: "Jen Doe"
+        accountNumber:
+          type: string
+          description: "Card number."
+          example: "4242424242424242"
+        cvv:
+          type: string
+          description: "3-4 digits"
+          example: "123"
+        expirationMonth:
+          type: string
+          example: "01"
+        expirationYear:
+          type: string
+          example: "2021"
+        billingAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+    CardResponse:
+      type: object
+      properties:
+        last4:
+          type: string
+          description: "Last 4 digits of card number"
+          example: "4242"
+        brand:
+          type: string
+          example: "Visa"
+        expirationMonth:
+          type: string
+          example: "01"
+        expirationYear:
+          type: string
+          example: "2021"
+        createdAt:
+          type: string
+          format: datetime
+          example: "2020-11-19T01:35:53.096Z"
+        billingAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+        subType:
+          type: string
+          enum:
+            - CREDIT
+            - DEBIT
+          example: "CREDIT"
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "6f0eb884-3f41-4b57-b86a-80f62dca011e"
+        type:
+          type: string
+          enum:
+            - CARD
+            - BANK_ACCOUNT
+        data:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/CardResponse"
+            - $ref: "#/components/schemas/BankAccountResponse"
+        status:
+          type: string
+          allOf:
+              - $ref: "#/components/schemas/PaymentMethodStatus"
+          example: "ACTIVE"
+        statusReasons:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/StatusReason"
+
+    CreatePayerRequest:
+      type: object
+      required:
+        - contact
+      properties:
+        businessName:
+          type: string
+          example: Philz Coffee
+        contact:
+          type: object
+          $ref: "#/components/schemas/Contact"
+        businessAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+        identityDocuments:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/IdentityDocuments"
+    UpdatePayerRequest:
+      type: object
+      properties:
+        businessName:
+          type: string
+          example: Philz Coffee
+        contact:
+          type: object
+          $ref: "#/components/schemas/Contact"
+        businessAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+        identityDocuments:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/IdentityDocuments"
+    Payer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "8f51c396-6e29-49a6-ba5a-1a31d5420158"
+        businessName:
+          type: string
+          example: "Philz Coffee"
+        contact:
+          type: object
+          $ref: "#/components/schemas/Contact"
+        businessAddress:
+          type: object
+          allOf:
+            - $ref: "#/components/schemas/Address"
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          allOf:
+            - $ref: "#/components/schemas/Status"
+        identityDocuments:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentityDocumentResponse"
+    Address:
+      type: object
+      required:
+        - line1
+        - country
+        - city
+        - state
+        - postalCode
+      properties:
+        line1:
+          type: string
+          description: "Address line 1 (e.g., street, PO Box, or company name)."
+          example: "360 9th St."
+        line2:
+          type: string
+          description: "Address line 2 (e.g., apartment, suite, unit, or building)."
+          example:
+        city:
+          type: string
+          description: "City, district, suburb, town, or village."
+          example: "San Francisco"
+        state:
+          type: string
+          description: "State, county, province, or region."
+          example: "CA"
+        postalCode:
+          type: string
+          description: "ZIP or postal code."
+          example: "94103"
+        country:
+          type: string
+          description: "Two-letter country code (ISO 3166-1 alpha-2)."
+          example: "US"
+    Contact:
+      oneOf:
+        - type: object
+          required:
+            - email
+          properties:
+            firstName:
+              type: string
+              example: "Bob"
+            lastName:
+              type: string
+              example: "Smith"
+            email:
+              type: string
+              example: "bobsmith@coffeebean.supply"
+            phone:
+              type: string
+              example: "4155550100"
+        - type: object
+          required:
+            - phone
+          properties:
+            firstName:
+              type: string
+              example: "Bob"
+            lastName:
+              type: string
+              example: "Smith"
+            email:
+              type: string
+              example: "bobsmith@coffeebean.supply"
+            phone:
+              type: string
+              example: "4155550100"
+    PaginationObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 1
+        hasNextPage:
+          type: boolean
+          example: false
+    RecipientAddress:
+      type: object
+      required:
+        - line1
+        - country
+      properties:
+        line1:
+          type: string
+          description: "Address line 1 (e.g., street, PO Box, or company name)."
+          example: "19439 Stevens Creek Blvd"
+        line2:
+          type: string
+          description: "Address line 2 (e.g., apartment, suite, unit, or building)."
+          example:
+        city:
+          type: string
+          description: "City, district, suburb, town, or village."
+          example: "Cupertino"
+        state:
+          type: string
+          description: "State, county, province, or region."
+          example: "CA"
+        postalCode:
+          type: string
+          description: "ZIP or postal code."
+          example: "95014"
+        country:
+          type: string
+          description: "Two-letter country code (ISO 3166-1 alpha-2)."
+          example: "US"
+    CreateDocumentUploadRequest:
+      type: object
+      required:
+        - type
+        - fileType
+        - filename
+        - payer
+      oneOf:
+        - type: object
+          properties: 
+            paymentIntent:
+              $ref: "#/components/schemas/paymentIntentId"
+        - type: object
+          properties: 
+            payment:
+              $ref: "#/components/schemas/paymentId"
+        - type: object
+          properties: 
+            recipient:
+              $ref: "#/components/schemas/recipientId"
+      properties:
+        payer:
+          $ref: "#/components/schemas/payerId"
+        type:
+          type: string
+          enum:
+            - INVOICE
+        fileType:
+          type: string
+          enum:
+            - doc
+            - docx
+            - gif
+            - jpeg
+            - jpg
+            - pdf
+            - xls
+            - xlsx
+        filename:
+          type: string
+          example: "invoice_123.pdf"
+    DocumentUpload:
+      type: object
+      properties:
+        uploadURL:
+          type: string
+          format: url
+        metadata:
+          type: object
+          properties:
+            Key:
+              type: string
+            success_action_status:
+              type: string
+              example: '201'
+            bucket:
+              type: string
+            'X-Amz-Algorithm':
+              type: string
+            'X-Amz-Credential':
+              type: string
+            'X-Amz-Date':
+              type: string
+            'X-Amz-Security-Token':
+              type: string
+            Policy:
+              type: string
+            'X-Amz-Signature':
+              type: string
+    ClientSecret:
+      type: string
+      description: "Client Secret returned by /client-secrets"
+      example: "XYZCLIENTSECRET123"
+    amountDetails:
+      type: object
+      description: Amount that will be credited to Recipient
+      required:
+        - currency
+        - value
+      properties:
+        value:
+          type: number
+          example: 100
+          description: "Value of the currency between 1 and 99999999.99"
+        currency:
+          type: string
+          description: Currency value
+          enum:
+            - USD
+    PaymentDetails:
+      type: object
+      properties:
+        accountName:
+          type: string
+          example: "Jen Doe"
+          description: "TBD"
+        accountNumber:
+          type: string
+          example: "647823643287423"
+          description: "TBD"
+        memo:
+          type: string
+          example: "Payment for Oct. coffee beans inventory"
+          description: "TBD"
+
+    PaymentMetadata:
+      type: object
+      description: "additional payment information to support operational requirements"
+
+    PaymentMethodStatus:
+      example: "INACTIVE"
+      type: string
+      description: "In some cases Payment Method will remain Inactive until additional information provided"
+      enum:
+        - "ACTIVE"
+        - "INACTIVE"
+
+    Status:
+      example: "ACTIVE"
+      type: string
+      description: "The status of an object"
+      enum:
+        - "ACTIVE"
+        - "INACTIVE"
+        - "UNKNOWN"
+
+    StatusReason:
+      type: object
+      description: "Used to provide more context in reference to the status response"
+      properties:
+        code:
+          type: string
+          example: "STATUS_REASON_CODE"
+        message:
+          type: string
+          example: "Some message to help resolve status issue."
+
+    PaymentStatus:
+      example: "DEPOSITED"
+      type: string
+      description: "The current state of a Payment"
+      enum:
+        - "SUBMITTED"
+        - "COMMITTED"
+        - "DEPOSITED"
+        - "CANCELLED"
+
+    IdentityDocuments:
+      type: object
+      description: "This is currently only required if a Payment method from Texas is added."
+      required:
+        - type
+        - value
+      properties:
+        type:
+          example: "US_SSN"
+          type: string
+          enum:
+            - "US_TIN"
+            - "US_EIN"
+            - "US_SSN"
+            - "PASSPORT_NUMBER"
+            - "ALIEN_REGISTRATION_NUMBER"
+        value:
+          example: "123456789"
+          type: string
+        countryOfIssuance:
+          description: "Passport country of issuance. Two-letter country code (ISO 3166-1 alpha-2)."
+          type: string
+          example: "US"
+
+    IdentityDocumentResponse:
+      type: object
+      properties:
+        type:
+          example: "US_SSN"
+          type: string
+          enum:
+            - "US_TIN"
+            - "US_EIN"
+            - "US_SSN"
+            - "PASSPORT_NUMBER"
+            - "ALIEN_REGISTRATION_NUMBER"
+        id:
+          type: string
+          format: uuid
+
+tags:
+  - name: Recipients
+    description: The recipient is the party (usually a business) to whom funds are sent. This is usually a business address or bank account.
